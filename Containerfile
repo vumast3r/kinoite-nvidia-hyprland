@@ -1,6 +1,5 @@
-FROM ghcr.io/ublue-os/kinoite-nvidia:stable
+kFROM ghcr.io/ublue-os/kinoite-nvidia:43
 
-# Add solopasha/hyprland COPR repo (Fedora 43 x86_64)
 RUN printf '%s\n' \
 '[copr:copr.fedorainfracloud.org:solopasha:hyprland]' \
 'name=Copr repo for hyprland owned by solopasha' \
