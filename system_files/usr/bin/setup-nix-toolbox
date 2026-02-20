@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+NAME="${1:-nix}"
+IMAGE="${2:-registry.fedoraproject.org/fedora-toolbox:43}"
+
+echo "[*] Creating toolbox '${NAME}' from ${IMAGE} (if missing)..."
+if ! toolbox list | awk '{print $2}' | grep -qx "${NAME}"; then
+  toolbox create -c "${NAME}" --image "${IMAGE}"
+fi
+
+echo "[*] Installing nix + basics inside '${NAME}'..."
+toolbox run -c "${NAME}" sudo dnf install -y \
+  nix \
+  git \
+  curl \
+  xz \
+  bzip2 \
+  gcc \
+  gcc-c++ \
+  make \
+  pkgconf-pkg-config \
+  openssl-devel \
+  zlib-devel
+
+echo
+echo "✅ Done."
+echo "Enter it with: toolbox enter -c ${NAME}"
+echo "Check: nix --version"
+
