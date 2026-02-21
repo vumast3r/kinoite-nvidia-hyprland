@@ -2,44 +2,43 @@ FROM ghcr.io/ublue-os/kinoite-nvidia:43
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
-# --- COPR repos ---
-RUN cat > /etc/yum.repos.d/_copr_solopasha-hyprland.repo <<'EOF'
-[copr:copr.fedorainfracloud.org:solopasha:hyprland]
-name=Copr repo for hyprland owned by solopasha
-baseurl=https://download.copr.fedorainfracloud.org/results/solopasha/hyprland/fedora-43-x86_64/
-type=rpm-md
-skip_if_unavailable=True
-gpgcheck=1
-gpgkey=https://download.copr.fedorainfracloud.org/results/solopasha/hyprland/pubkey.gpg
-repo_gpgcheck=0
-enabled=1
-enabled_metadata=1
-EOF
+# COPR repos (NO heredocs; builder chokes on them)
+RUN printf '%s\n' \
+'[copr:copr.fedorainfracloud.org:solopasha:hyprland]' \
+'name=Copr repo for hyprland owned by solopasha' \
+'baseurl=https://download.copr.fedorainfracloud.org/results/solopasha/hyprland/fedora-43-x86_64/' \
+'type=rpm-md' \
+'skip_if_unavailable=True' \
+'gpgcheck=1' \
+'gpgkey=https://download.copr.fedorainfracloud.org/results/solopasha/hyprland/pubkey.gpg' \
+'repo_gpgcheck=0' \
+'enabled=1' \
+'enabled_metadata=1' \
+> /etc/yum.repos.d/_copr_solopasha-hyprland.repo
 
-RUN cat > /etc/yum.repos.d/_copr_errornointernet-quickshell.repo <<'EOF'
-[copr:copr.fedorainfracloud.org:errornointernet:quickshell]
-name=Copr repo for quickshell owned by errornointernet
-baseurl=https://download.copr.fedorainfracloud.org/results/errornointernet/quickshell/fedora-43-x86_64/
-type=rpm-md
-skip_if_unavailable=True
-gpgcheck=1
-gpgkey=https://download.copr.fedorainfracloud.org/results/errornointernet/quickshell/pubkey.gpg
-repo_gpgcheck=0
-enabled=1
-enabled_metadata=1
-EOF
+RUN printf '%s\n' \
+'[copr:copr.fedorainfracloud.org:errornointernet:quickshell]' \
+'name=Copr repo for quickshell owned by errornointernet' \
+'baseurl=https://download.copr.fedorainfracloud.org/results/errornointernet/quickshell/fedora-43-x86_64/' \
+'type=rpm-md' \
+'skip_if_unavailable=True' \
+'gpgcheck=1' \
+'gpgkey=https://download.copr.fedorainfracloud.org/results/errornointernet/quickshell/pubkey.gpg' \
+'repo_gpgcheck=0' \
+'enabled=1' \
+'enabled_metadata=1' \
+> /etc/yum.repos.d/_copr_errornointernet-quickshell.repo
 
-# --- Make COPR downloads less fragile in CI ---
-RUN cat >> /etc/dnf/dnf.conf <<'EOF'
-fastestmirror=True
-max_parallel_downloads=5
-retries=20
-timeout=120
-minrate=1
-EOF
+# Make COPR downloads less fragile in CI
+RUN printf '%s\n' \
+'fastestmirror=True' \
+'max_parallel_downloads=5' \
+'retries=20' \
+'timeout=120' \
+'minrate=1' \
+>> /etc/dnf/dnf.conf
 
-# --- Packages ---
-# We use a bash array to avoid brittle "\" line continuations.
+# Packages (use a bash array so we can't break Dockerfile parsing)
 RUN pkgs=(
   # Hyprland + portals
   hyprland
@@ -110,11 +109,11 @@ RUN pkgs=(
   qt6-qtsvg-devel
 ); rpm-ostree install "${pkgs[@]}" && ostree container commit
 
-# --- Copy repo system files (scripts, units, etc.) ---
+# Copy repo system files into the image
 COPY system_files/ /
 RUN ostree container commit
 
-# --- Build + install Caelestia Shell (installs QML module "Caelestia") ---
+# Build + install Caelestia Shell (installs QML module "Caelestia")
 RUN git clone --filter=blob:none --tags https://github.com/caelestia-dots/shell.git /tmp/caelestia-shell \
  && cmake -S /tmp/caelestia-shell -B /tmp/caelestia-shell/build -G Ninja \
       -DCMAKE_BUILD_TYPE=Release \
