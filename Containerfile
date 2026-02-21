@@ -48,9 +48,12 @@ RUN rpm-ostree install \
     xdg-desktop-portal-hyprland \
     xdg-desktop-portal-gtk \
     qt6-qtwayland \
-    quickshell \
+    quickshell-git \
     qt6-qtdeclarative \
     qt6-qtsvg \
+    qt6-qtquickcontrols2 \
+    qt6-qtgraphicaleffects \
+    cava \
     wofi \
     foot \
     wl-clipboard \
