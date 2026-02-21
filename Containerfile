@@ -1,6 +1,7 @@
 FROM ghcr.io/ublue-os/kinoite-nvidia:43
 
 # Add COPRs (hyprland + quickshell-git)
+# priority=1 added to force the latest Hyprland version over Fedora's defaults
 RUN printf '%s\n' \
   '[copr:copr.fedorainfracloud.org:solopasha:hyprland]' \
   'name=Copr repo for hyprland owned by solopasha' \
@@ -12,6 +13,7 @@ RUN printf '%s\n' \
   'repo_gpgcheck=0' \
   'enabled=1' \
   'enabled_metadata=1' \
+  'priority=1' \
   > /etc/yum.repos.d/_copr_solopasha-hyprland.repo
 
 RUN printf '%s\n' \
@@ -25,6 +27,7 @@ RUN printf '%s\n' \
   'repo_gpgcheck=0' \
   'enabled=1' \
   'enabled_metadata=1' \
+  'priority=1' \
   > /etc/yum.repos.d/_copr_errornointernet-quickshell.repo
 
 # Make COPR downloads less flaky
@@ -45,10 +48,11 @@ RUN rpm-ostree install \
     quickshell-git \
     \
     # Hyprland UI workflow tools \
+    kitty \
     rofi-wayland \
     swww \
     cliphist \
-    mate-polkit \
+    hyprpolkitagent \
     jq \
     wl-clipboard \
     grim \
@@ -58,6 +62,7 @@ RUN rpm-ostree install \
     brightnessctl \
     pavucontrol \
     playerctl \
+    tuned-ppd \
     \
     # Gaming & System \
     gamemode \
@@ -145,28 +150,10 @@ RUN git clone --depth=1 https://github.com/caelestia-dots/cli.git /tmp/caelestia
     && rm -rf /tmp/caelestia-cli \
     && ostree container commit
 
-# ---- Create and embed the install-caelestia-shell script directly ----
-RUN printf '%s\n' \
-  '#!/usr/bin/env bash' \
-  'set -euo pipefail' \
-  '' \
-  'DST="${HOME}/.config/quickshell/caelestia"' \
-  'mkdir -p "${HOME}/.config/quickshell"' \
-  '' \
-  'if [[ -e "${DST}" ]]; then' \
-  '  echo "Refusing to overwrite existing: ${DST}"' \
-  '  echo "Remove it if you want a fresh install."' \
-  '  exit 1' \
-  'fi' \
-  '' \
-  '# Copy the offline embedded config from the image' \
-  'cp -r /usr/share/quickshell/caelestia "${DST}"' \
-  '' \
-  'echo "Installed Caelestia config → ${DST}"' \
-  'echo "Run: qs -c caelestia"' \
-  > /usr/bin/install-caelestia-shell \
-  && chmod +x /usr/bin/install-caelestia-shell \
-  && ostree container commit
+# ---- Your custom system files & installer scripts ----
+COPY system_files/ /
+RUN chmod +x /usr/bin/install-caelestia-shell \
+    && ostree container commit
 
 # ---- Update dynamic linker cache for manually compiled libraries ----
 RUN ldconfig \
