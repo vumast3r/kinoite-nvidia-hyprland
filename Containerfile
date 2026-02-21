@@ -52,7 +52,7 @@ RUN rpm-ostree install \
     qt6-qtdeclarative \
     qt6-qtsvg \
     qt6-qtquickcontrols2 \
-    qt6-qtgraphicaleffects \
+    qt6-qt5compat \
     cava \
     wofi \
     foot \
