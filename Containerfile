@@ -45,11 +45,10 @@ RUN rpm-ostree install \
     quickshell-git \
     \
     # Hyprland UI workflow tools \
-    kitty \
     rofi-wayland \
     swww \
     cliphist \
-    polkit-gnome \
+    mate-polkit \
     jq \
     wl-clipboard \
     grim \
