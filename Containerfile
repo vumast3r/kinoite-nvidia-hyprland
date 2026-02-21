@@ -39,10 +39,7 @@ RUN printf '%s\n' \
 # ---------------------------------------------------------
 # Install packages
 # ---------------------------------------------------------
-# Notes:
-# - Fedora package name is vkBasalt (capital B)
-# - We install git temporarily to clone Caelestia during build
-# - qt6-qtdeclarative + qt6-qtsvg are common Quickshell/QML deps
+# add in cmake, ninja-build, gcc-c++, and make
 RUN rpm-ostree install \
     hyprland \
     xdg-desktop-portal-hyprland \
@@ -50,8 +47,10 @@ RUN rpm-ostree install \
     qt6-qtwayland \
     quickshell-git \
     qt6-qtdeclarative \
-    qt6-qtsvg \
     qt6-qtquickcontrols2 \
+    qt6-qtsvg \
+    qt6-qtimageformats \
+    qt6-qtshadertools \
     qt6-qt5compat \
     cava \
     wofi \
@@ -70,6 +69,10 @@ RUN rpm-ostree install \
     toolbox \
     distrobox \
     git \
+    cmake \
+    ninja-build \
+    gcc-c++ \
+    make \
     && ostree container commit
 
 # ---------------------------------------------------------
@@ -84,3 +87,12 @@ RUN mkdir -p /usr/share/quickshell \
 # Copy repo-provided system files into the image (scripts, configs, etc.)
 COPY system_files/ /
 RUN ostree container commit
+# Build + install Caelestia Shell (installs the QML module "Caelestia")
+RUN git clone --depth=1 https://github.com/caelestia-dots/shell.git /tmp/caelestia-shell \
+ && cmake -S /tmp/caelestia-shell -B /tmp/caelestia-shell/build -G Ninja \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX=/usr \
+ && cmake --build /tmp/caelestia-shell/build \
+ && cmake --install /tmp/caelestia-shell/build \
+ && rm -rf /tmp/caelestia-shell \
+ && ostree container commit
