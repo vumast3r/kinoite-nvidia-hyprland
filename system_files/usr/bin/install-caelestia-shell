@@ -10,8 +10,8 @@ if [[ -e "${DST}" ]]; then
   exit 1
 fi
 
-git clone --depth=1 https://github.com/caelestia-dots/shell.git "${DST}"
-rm -rf "${DST}/.git"
+# Copy the embedded config from the image instead of git cloning
+cp -r /usr/share/quickshell/caelestia "${DST}"
 
 echo "Installed Caelestia config → ${DST}"
 echo "Run: qs -c caelestia"
