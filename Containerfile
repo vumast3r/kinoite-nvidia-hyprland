@@ -108,6 +108,7 @@ RUN rpm-ostree install \
     libqalculate-devel \
     pipewire-devel \
     lm_sensors-devel \
+    aubio-devel
     \
     # Qt dev + private dev (required for this ecosystem)
     qt6-qtbase-devel \
