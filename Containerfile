@@ -93,7 +93,7 @@ RUN rpm-ostree install \
     meson \
     pkgconf-pkg-config \
     \
-    # Caelestia plugin deps (headers + pkg-config) \
+    # Caelestia plugin deps \
     aubio-devel \
     libqalculate-devel \
     pipewire-devel \
@@ -103,7 +103,7 @@ RUN rpm-ostree install \
     fftw3-devel \
     iniparser-devel \
     \
-    # Qt6 dev (Needed for Caelestia, support packages, and polkit) \
+    # Qt6 dev \
     qt6-qtbase-devel \
     qt6-qtdeclarative-devel \
     qt6-qtquickcontrols2-devel \
@@ -113,7 +113,7 @@ RUN rpm-ostree install \
     # Hyprland custom build deps \
     polkit-qt6-1-devel \
     hyprutils-devel \
-    hyprwayland-scanner \
+    pugixml-devel \
     \
     && ostree container commit
 
@@ -129,7 +129,17 @@ RUN git clone --filter=blob:none --depth=1 https://github.com/LukashonakV/cava.g
  && if [ -f /usr/lib64/pkgconfig/libcava.pc ]; then ln -sf /usr/lib64/pkgconfig/libcava.pc /usr/lib64/pkgconfig/cava.pc; fi \
  && ostree container commit
 
-# ---- Build/install hyprland-qt-support (Required by hyprpolkitagent) ----
+# ---- Build/install hyprwayland-scanner ----
+RUN git clone --depth=1 https://github.com/hyprwm/hyprwayland-scanner.git /tmp/hyprwayland-scanner \
+    && cmake -S /tmp/hyprwayland-scanner -B /tmp/hyprwayland-scanner/build \
+         -DCMAKE_BUILD_TYPE=Release \
+         -DCMAKE_INSTALL_PREFIX=/usr \
+    && cmake --build /tmp/hyprwayland-scanner/build \
+    && cmake --install /tmp/hyprwayland-scanner/build \
+    && rm -rf /tmp/hyprwayland-scanner \
+    && ostree container commit
+
+# ---- Build/install hyprland-qt-support ----
 RUN git clone --depth=1 https://github.com/hyprwm/hyprland-qt-support.git /tmp/hyprland-qt-support \
     && cmake -S /tmp/hyprland-qt-support -B /tmp/hyprland-qt-support/build \
          -DCMAKE_BUILD_TYPE=Release \
