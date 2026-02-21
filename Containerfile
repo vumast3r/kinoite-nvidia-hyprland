@@ -113,6 +113,7 @@ RUN rpm-ostree install \
     # Hyprland custom build deps \
     polkit-qt6-1-devel \
     hyprutils-devel \
+    hyprlang-devel \
     pugixml-devel \
     \
     && ostree container commit
@@ -144,6 +145,7 @@ RUN git clone --depth=1 https://github.com/hyprwm/hyprland-qt-support.git /tmp/h
     && cmake -S /tmp/hyprland-qt-support -B /tmp/hyprland-qt-support/build \
          -DCMAKE_BUILD_TYPE=Release \
          -DCMAKE_INSTALL_PREFIX=/usr \
+         -DINSTALL_QMLDIR=/usr/lib64/qt6/qml \
     && cmake --build /tmp/hyprland-qt-support/build \
     && cmake --install /tmp/hyprland-qt-support/build \
     && rm -rf /tmp/hyprland-qt-support \
@@ -154,6 +156,7 @@ RUN git clone --depth=1 https://github.com/hyprwm/hyprpolkitagent.git /tmp/hyprp
     && cmake -S /tmp/hyprpolkitagent -B /tmp/hyprpolkitagent/build \
          -DCMAKE_BUILD_TYPE=Release \
          -DCMAKE_INSTALL_PREFIX=/usr \
+         -DINSTALL_QMLDIR=/usr/lib64/qt6/qml \
     && cmake --build /tmp/hyprpolkitagent/build \
     && cmake --install /tmp/hyprpolkitagent/build \
     && rm -rf /tmp/hyprpolkitagent \
