@@ -10,7 +10,7 @@ if [[ -e "${DST}" ]]; then
   exit 1
 fi
 
-# Copy the embedded config from the image instead of git cloning
+# Copy the offline embedded config from the image
 cp -r /usr/share/quickshell/caelestia "${DST}"
 
 echo "Installed Caelestia config → ${DST}"

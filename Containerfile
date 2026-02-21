@@ -93,8 +93,6 @@ RUN rpm-ostree install \
     && ostree container commit
 
 # ---- Build/install libcava (fork that actually provides a shared lib) ----
-# Caelestia asks pkg-config for "cava", but this fork generates "libcava.pc".
-# We'll symlink cava.pc -> libcava.pc so pkg-config -lcava works.
 RUN git clone --filter=blob:none --depth=1 https://github.com/LukashonakV/cava.git /tmp/libcava \
  && meson setup /tmp/libcava/build /tmp/libcava \
       -Dbuild_target=lib \
@@ -103,8 +101,7 @@ RUN git clone --filter=blob:none --depth=1 https://github.com/LukashonakV/cava.g
  && meson compile -C /tmp/libcava/build \
  && meson install -C /tmp/libcava/build \
  && rm -rf /tmp/libcava \
- && if [ -f /usr/lib64/pkgconfig/libcava.pc ]; \
- then ln -sf /usr/lib64/pkgconfig/libcava.pc /usr/lib64/pkgconfig/cava.pc; fi \
+ && if [ -f /usr/lib64/pkgconfig/libcava.pc ]; then ln -sf /usr/lib64/pkgconfig/libcava.pc /usr/lib64/pkgconfig/cava.pc; fi \
  && ostree container commit
 
 # ---- Embed Caelestia shell config (for your installer script to link) ----
@@ -129,6 +126,7 @@ RUN git clone --filter=blob:none --tags https://github.com/caelestia-dots/shell.
 COPY system_files/ /
 RUN chmod +x /usr/bin/install-caelestia-shell \
     && ostree container commit
+
 # ---- Update dynamic linker cache for manually compiled libraries ----
 RUN ldconfig \
     && ostree container commit
