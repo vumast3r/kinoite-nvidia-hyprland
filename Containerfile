@@ -189,7 +189,6 @@ RUN git clone --depth=1 https://github.com/caelestia-dots/cli.git /tmp/caelestia
 
 # ---- Your custom system files & installer scripts ----
 COPY system_files/ /
-RUN chmod +x /usr/bin/install-caelestia-shell \
     && ostree container commit
 
 # ---- Update dynamic linker cache ----
