@@ -1,4 +1,4 @@
-FROM ghcr.io/ublue-os/kinoite-nvidia:43
+FROM ghcr.io/ublue-os/kinoite-nvidia:44
 
 RUN printf '%s\n' \
 '[copr:copr.fedorainfracloud.org:solopasha:hyprland]' \
