@@ -52,8 +52,11 @@ RUN rpm-ostree install \
     qt6-qtimageformats \
     qt6-qtshadertools \
     qt6-qt5compat \
+    pkgconf-pkg-config \
     qt6-qtbase-devel \
+    qt6-qtbase-private-devel \
     qt6-qtdeclarative-devel \
+    qt6-qtdeclarative-private-devel \
     qt6-qtwayland-devel \
     qt6-qtsvg-devel \
     cava \
@@ -90,6 +93,7 @@ RUN git clone --filter=blob:none --tags https://github.com/caelestia-dots/shell.
  && cmake -S /tmp/caelestia-shell -B /tmp/caelestia-shell/build -G Ninja \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX=/usr \
+      -DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE \
  && cmake --build /tmp/caelestia-shell/build \
  && cmake --install /tmp/caelestia-shell/build \
  && rm -rf /tmp/caelestia-shell \
