@@ -113,13 +113,17 @@ RUN mkdir -p /usr/share/quickshell \
     && ostree container commit
 
 # ---- Build/install Caelestia plugin (installs the "Caelestia" QML module) ----
+# ---- Build/install Caelestia plugin (installs the "Caelestia" QML module) ----
 RUN git clone --filter=blob:none --tags https://github.com/caelestia-dots/shell.git /tmp/caelestia-shell \
     && cmake -S /tmp/caelestia-shell -B /tmp/caelestia-shell/build -G Ninja \
          -DCMAKE_BUILD_TYPE=Release \
          -DCMAKE_INSTALL_PREFIX=/usr \
+         -DCMAKE_INSTALL_LIBDIR=lib64 \
+         -DQT6_INSTALL_QMLDIR=/usr/lib64/qt6/qml \
     && cmake --build /tmp/caelestia-shell/build \
     && cmake --install /tmp/caelestia-shell/build \
     && rm -rf /tmp/caelestia-shell \
+    && rm -rf /usr/usr \
     && ostree container commit
 
 # Your tiny installer script (and any other system_files/* you keep)
