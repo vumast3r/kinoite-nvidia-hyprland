@@ -27,7 +27,7 @@ RUN printf '%s\n' \
   'enabled_metadata=1' \
   > /etc/yum.repos.d/_copr_errornointernet-quickshell.repo
 
-# Make COPR downloads less flaky (timeouts/retries)
+# Make COPR downloads less flaky
 RUN printf '%s\n' \
   'fastestmirror=True' \
   'max_parallel_downloads=5' \
@@ -36,21 +36,32 @@ RUN printf '%s\n' \
   'minrate=1' \
   >> /etc/dnf/dnf.conf
 
-# Base runtime + build deps needed for Caelestia plugin + libcava
+# Base runtime, desktop workflow dependencies, and build tools
 RUN rpm-ostree install \
     hyprland \
     xdg-desktop-portal-hyprland \
     xdg-desktop-portal-gtk \
     qt6-qtwayland \
     quickshell-git \
-    foot \
-    wofi \
+    \
+    # Hyprland UI workflow tools \
+    kitty \
+    rofi-wayland \
+    swww \
+    cliphist \
+    polkit-gnome \
+    jq \
     wl-clipboard \
     grim \
     slurp \
+    swappy \
+    hyprpicker \
     brightnessctl \
     pavucontrol \
     playerctl \
+    power-profiles-daemon \
+    \
+    # Gaming & System \
     gamemode \
     gamescope \
     mangohud \
@@ -61,11 +72,19 @@ RUN rpm-ostree install \
     pipewire \
     pipewire-libs \
     NetworkManager \
+    \
+    # Fonts and scripting \
+    cascadia-code-fonts \
+    python3 \
+    python3-pip \
+    \
+    # Container / OS tools \
     podman \
     toolbox \
     distrobox \
     git \
     \
+    # Build Tools \
     cmake \
     ninja-build \
     gcc-c++ \
@@ -73,17 +92,17 @@ RUN rpm-ostree install \
     meson \
     pkgconf-pkg-config \
     \
-    # Caelestia plugin deps (headers + pkg-config)
+    # Caelestia plugin deps (headers + pkg-config) \
     aubio-devel \
     libqalculate-devel \
     pipewire-devel \
     NetworkManager-libnm-devel \
     \
-    # libcava build deps (meson will look for these)
+    # libcava build deps \
     fftw3-devel \
     iniparser-devel \
     \
-    # Qt6 dev (for cmake find_package(Qt6 ...))
+    # Qt6 dev \
     qt6-qtbase-devel \
     qt6-qtdeclarative-devel \
     qt6-qtquickcontrols2-devel \
@@ -104,13 +123,13 @@ RUN git clone --filter=blob:none --depth=1 https://github.com/LukashonakV/cava.g
  && if [ -f /usr/lib64/pkgconfig/libcava.pc ]; then ln -sf /usr/lib64/pkgconfig/libcava.pc /usr/lib64/pkgconfig/cava.pc; fi \
  && ostree container commit
 
-# ---- Embed Caelestia shell config (for your installer script to link) ----
+# ---- Embed Caelestia shell config ----
 RUN mkdir -p /usr/share/quickshell \
     && git clone --depth=1 https://github.com/caelestia-dots/shell /usr/share/quickshell/caelestia \
     && rm -rf /usr/share/quickshell/caelestia/.git \
     && ostree container commit
 
-# ---- Build/install Caelestia plugin (installs the "Caelestia" QML module) ----
+# ---- Build/install Caelestia plugin ----
 RUN git clone --filter=blob:none --tags https://github.com/caelestia-dots/shell.git /tmp/caelestia-shell \
     && cmake -S /tmp/caelestia-shell -B /tmp/caelestia-shell/build -G Ninja \
          -DCMAKE_BUILD_TYPE=Release \
@@ -122,10 +141,34 @@ RUN git clone --filter=blob:none --tags https://github.com/caelestia-dots/shell.
     && rm -rf /tmp/caelestia-shell \
     && ostree container commit
 
-# Your tiny installer script (and any other system_files/* you keep)
-COPY system_files/ /
-RUN chmod +x /usr/bin/install-caelestia-shell \
+# ---- Install caelestia-cli (Required for buttons/menus to work) ----
+RUN git clone --depth=1 https://github.com/caelestia-dots/cli.git /tmp/caelestia-cli \
+    && pip3 install --prefix=/usr --break-system-packages /tmp/caelestia-cli \
+    && rm -rf /tmp/caelestia-cli \
     && ostree container commit
+
+# ---- Create and embed the install-caelestia-shell script directly ----
+RUN printf '%s\n' \
+  '#!/usr/bin/env bash' \
+  'set -euo pipefail' \
+  '' \
+  'DST="${HOME}/.config/quickshell/caelestia"' \
+  'mkdir -p "${HOME}/.config/quickshell"' \
+  '' \
+  'if [[ -e "${DST}" ]]; then' \
+  '  echo "Refusing to overwrite existing: ${DST}"' \
+  '  echo "Remove it if you want a fresh install."' \
+  '  exit 1' \
+  'fi' \
+  '' \
+  '# Copy the offline embedded config from the image' \
+  'cp -r /usr/share/quickshell/caelestia "${DST}"' \
+  '' \
+  'echo "Installed Caelestia config → ${DST}"' \
+  'echo "Run: qs -c caelestia"' \
+  > /usr/bin/install-caelestia-shell \
+  && chmod +x /usr/bin/install-caelestia-shell \
+  && ostree container commit
 
 # ---- Update dynamic linker cache for manually compiled libraries ----
 RUN ldconfig \
