@@ -78,3 +78,6 @@ RUN mkdir -p /usr/share/quickshell \
  && git clone --depth=1 https://github.com/caelestia-dots/shell /usr/share/quickshell/caelestia \
  && rm -rf /usr/share/quickshell/caelestia/.git \
  && ostree container commit
+# Copy repo-provided system files into the image (scripts, configs, etc.)
+COPY system_files/ /
+RUN ostree container commit
