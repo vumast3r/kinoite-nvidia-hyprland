@@ -111,6 +111,7 @@ RUN rpm-ostree install \
     qt6-qt5compat-devel \
     \
     # Hyprland custom build deps \
+    polkit-devel \
     polkit-qt6-1-devel \
     hyprutils-devel \
     hyprlang-devel \
