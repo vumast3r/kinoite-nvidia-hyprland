@@ -1,7 +1,6 @@
 FROM ghcr.io/ublue-os/kinoite-nvidia:43
 
 # Add COPRs (hyprland + quickshell-git)
-# priority=1 added to force the latest Hyprland version over Fedora's defaults
 RUN printf '%s\n' \
   '[copr:copr.fedorainfracloud.org:solopasha:hyprland]' \
   'name=Copr repo for hyprland owned by solopasha' \
@@ -52,7 +51,6 @@ RUN rpm-ostree install \
     rofi-wayland \
     swww \
     cliphist \
-    hyprpolkitagent \
     jq \
     wl-clipboard \
     grim \
@@ -105,16 +103,21 @@ RUN rpm-ostree install \
     fftw3-devel \
     iniparser-devel \
     \
-    # Qt6 dev \
+    # Qt6 dev (Needed for Caelestia, support packages, and polkit) \
     qt6-qtbase-devel \
     qt6-qtdeclarative-devel \
     qt6-qtquickcontrols2-devel \
     qt6-qtsvg-devel \
     qt6-qt5compat-devel \
     \
+    # Hyprland custom build deps \
+    polkit-qt6-1-devel \
+    hyprutils-devel \
+    hyprwayland-scanner \
+    \
     && ostree container commit
 
-# ---- Build/install libcava (fork that actually provides a shared lib) ----
+# ---- Build/install libcava ----
 RUN git clone --filter=blob:none --depth=1 https://github.com/LukashonakV/cava.git /tmp/libcava \
  && meson setup /tmp/libcava/build /tmp/libcava \
       -Dbuild_target=lib \
@@ -125,6 +128,26 @@ RUN git clone --filter=blob:none --depth=1 https://github.com/LukashonakV/cava.g
  && rm -rf /tmp/libcava \
  && if [ -f /usr/lib64/pkgconfig/libcava.pc ]; then ln -sf /usr/lib64/pkgconfig/libcava.pc /usr/lib64/pkgconfig/cava.pc; fi \
  && ostree container commit
+
+# ---- Build/install hyprland-qt-support (Required by hyprpolkitagent) ----
+RUN git clone --depth=1 https://github.com/hyprwm/hyprland-qt-support.git /tmp/hyprland-qt-support \
+    && cmake -S /tmp/hyprland-qt-support -B /tmp/hyprland-qt-support/build \
+         -DCMAKE_BUILD_TYPE=Release \
+         -DCMAKE_INSTALL_PREFIX=/usr \
+    && cmake --build /tmp/hyprland-qt-support/build \
+    && cmake --install /tmp/hyprland-qt-support/build \
+    && rm -rf /tmp/hyprland-qt-support \
+    && ostree container commit
+
+# ---- Build/install hyprpolkitagent ----
+RUN git clone --depth=1 https://github.com/hyprwm/hyprpolkitagent.git /tmp/hyprpolkitagent \
+    && cmake -S /tmp/hyprpolkitagent -B /tmp/hyprpolkitagent/build \
+         -DCMAKE_BUILD_TYPE=Release \
+         -DCMAKE_INSTALL_PREFIX=/usr \
+    && cmake --build /tmp/hyprpolkitagent/build \
+    && cmake --install /tmp/hyprpolkitagent/build \
+    && rm -rf /tmp/hyprpolkitagent \
+    && ostree container commit
 
 # ---- Embed Caelestia shell config ----
 RUN mkdir -p /usr/share/quickshell \
@@ -144,7 +167,7 @@ RUN git clone --filter=blob:none --tags https://github.com/caelestia-dots/shell.
     && rm -rf /tmp/caelestia-shell \
     && ostree container commit
 
-# ---- Install caelestia-cli (Required for buttons/menus to work) ----
+# ---- Install caelestia-cli ----
 RUN git clone --depth=1 https://github.com/caelestia-dots/cli.git /tmp/caelestia-cli \
     && pip3 install --prefix=/usr --break-system-packages /tmp/caelestia-cli \
     && rm -rf /tmp/caelestia-cli \
@@ -155,6 +178,6 @@ COPY system_files/ /
 RUN chmod +x /usr/bin/install-caelestia-shell \
     && ostree container commit
 
-# ---- Update dynamic linker cache for manually compiled libraries ----
+# ---- Update dynamic linker cache ----
 RUN ldconfig \
     && ostree container commit
