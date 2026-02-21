@@ -58,7 +58,6 @@ RUN rpm-ostree install \
     brightnessctl \
     pavucontrol \
     playerctl \
-    power-profiles-daemon \
     \
     # Gaming & System \
     gamemode \
