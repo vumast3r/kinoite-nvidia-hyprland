@@ -1,4 +1,4 @@
-# =====================================================================
+ddddddddddddddddddddddddddddddddddddddddddd# =====================================================================
 # Kinoite NVIDIA (Fedora 43) + Hyprland + Quickshell + Caelestia Shell
 # =====================================================================
 
@@ -78,17 +78,11 @@ RUN rpm-ostree install \
 # ---------------------------------------------------------
 # Embed Caelestia Shell system-wide for Quickshell
 # ---------------------------------------------------------
-# This clones the Caelestia shell repo into the immutable image.
-# Users can then symlink it into ~/.config/quickshell/caelestia
-RUN mkdir -p /usr/share/quickshell \
- && git clone --depth=1 https://github.com/caelestia-dots/shell /usr/share/quickshell/caelestia \
- && rm -rf /usr/share/quickshell/caelestia/.git \
- && ostree container commit
 # Copy repo-provided system files into the image (scripts, configs, etc.)
 COPY system_files/ /
 RUN ostree container commit
 # Build + install Caelestia Shell (installs the QML module "Caelestia")
-RUN git clone --depth=1 https://github.com/caelestia-dots/shell.git /tmp/caelestia-shell \
+RUN git clone --filter=blob:none --tags https://github.com/caelestia-dots/shell.git /tmp/caelestia-shell \
  && cmake -S /tmp/caelestia-shell -B /tmp/caelestia-shell/build -G Ninja \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX=/usr \
