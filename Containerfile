@@ -129,3 +129,6 @@ RUN git clone --filter=blob:none --tags https://github.com/caelestia-dots/shell.
 COPY system_files/ /
 RUN chmod +x /usr/bin/install-caelestia-shell \
     && ostree container commit
+# ---- Update dynamic linker cache for manually compiled libraries ----
+RUN ldconfig \
+    && ostree container commit
