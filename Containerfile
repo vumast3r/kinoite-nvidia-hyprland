@@ -52,6 +52,10 @@ RUN rpm-ostree install \
     qt6-qtimageformats \
     qt6-qtshadertools \
     qt6-qt5compat \
+    qt6-qtbase-devel \
+    qt6-qtdeclarative-devel \
+    qt6-qtwayland-devel \
+    qt6-qtsvg-devel \
     cava \
     wofi \
     foot \
