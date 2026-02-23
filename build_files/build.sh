@@ -1,24 +1,41 @@
 #!/bin/bash
-
 set -ouex pipefail
 
-### Install packages
+echo "=== System Build Starting ==="
 
-# Packages can be installed from any enabled yum repo on the image.
-# RPMfusion repos are available by default in ublue main images
-# List of rpmfusion packages can be found here:
-# https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/43/x86_64/repoview/index.html&protocol=https&redirect=1
+# 1. Add Custom Repositories
+curl -Lo /etc/yum.repos.d/purian23-material-symbols-fonts.repo https://copr.fedorainfracloud.org/coprs/purian23/material-symbols-fonts/repo/fedora-$(rpm -E %fedora)/purian23-material-symbols-fonts-fedora-$(rpm -E %fedora).repo
 
-# this installs a package from fedora repos
-dnf5 install -y tmux 
+# 2. Install Hyprland Base Compositor
+rpm-ostree install \
+    hyprland \
+    xdg-desktop-portal-hyprland
 
-# Use a COPR Example:
-#
-# dnf5 -y copr enable ublue-os/staging
-# dnf5 -y install package
-# Disable COPRs so they don't end up enabled on the final image:
-# dnf5 -y copr disable ublue-os/staging
+# 3. Install Caelestia Runtime & System Essentials
+rpm-ostree install \
+    brightnessctl \
+    ddcutil \
+    network-manager-applet \
+    lm_sensors \
+    fish \
+    nvtop \
+    fastfetch \
+    qalculate \
+    material-symbols-fonts \
+    playerctl \
+    grim \
+    slurp
 
-#### Example for enabling a System Unit File
+# 4. Install Qt6 & Wayland Compilation Headers
+rpm-ostree install \
+    cmake ninja-build gcc-c++ python3-pip autoconf automake libtool \
+    fftw-devel alsa-lib-devel iniparser-devel qt6-qtbase-devel \
+    qt6-qtdeclarative-devel qt6-qtwayland-devel qt6-qtsvg-devel \
+    qt6-qtshadertools-devel wayland-devel wayland-protocols-devel \
+    cli11-devel spirv-tools pkgconf-pkg-config libdrm-devel \
+    mesa-libgbm-devel pipewire-devel pulseaudio-libs-devel \
+    aubio-devel libxkbcommon-devel pam-devel NetworkManager-libnm-devel \
+    lm_sensors-devel libqalculate-devel polkit-devel meson ncurses-devel \
+    qt6-qtdeclarative qt6-qt5compat qt6-qtsvg qt6-qtmultimedia
 
-systemctl enable podman.socket
+echo "=== System Build Complete ==="
