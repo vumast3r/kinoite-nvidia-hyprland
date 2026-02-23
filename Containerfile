@@ -5,7 +5,7 @@ ARG FEDORA_VERSION=stable
 FROM ghcr.io/ublue-os/${BASE_IMAGE_NAME}:${FEDORA_VERSION}
 
 # Copy your custom build script into the container environment
-COPY build.sh build_files/build.sh
+COPY build_files/build.sh /tmp/build.sh
 
 # Execute the build script to layer your packages
-RUN build_files/build.sh
+RUN /tmp/build.sh
