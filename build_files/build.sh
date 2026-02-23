@@ -4,7 +4,11 @@ set -ouex pipefail
 echo "=== System Build Starting ==="
 
 # 1. Add Custom Repositories
+# Material Symbols Font
 curl -Lo /etc/yum.repos.d/purian23-material-symbols-fonts.repo https://copr.fedorainfracloud.org/coprs/purian23/material-symbols-fonts/repo/fedora-$(rpm -E %fedora)/purian23-material-symbols-fonts-fedora-$(rpm -E %fedora).repo
+
+# Solopasha Hyprland (Provides the missing Hyprland packages)
+curl -Lo /etc/yum.repos.d/solopasha-hyprland.repo https://copr.fedorainfracloud.org/coprs/solopasha/hyprland/repo/fedora-$(rpm -E %fedora)/solopasha-hyprland-fedora-$(rpm -E %fedora).repo
 
 # 2. Install Hyprland Base Compositor
 rpm-ostree install \
